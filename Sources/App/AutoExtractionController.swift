@@ -53,8 +53,8 @@ final class AutoExtractionController {
             trackedPaths.remove(url.standardizedFileURL.path)
         }
         queue.removeAll()
-        progressHUD.setPhase("正在取消…")
-        AppLog.info("User cancelled extraction")
+        progressHUD.setPhase(L("Canceling…"))
+        AppLog.info("User canceled extraction")
         serviceTask?.cancel()
         rootTask?.cancel()
     }
@@ -115,7 +115,7 @@ final class AutoExtractionController {
                     archiveName: archiveName,
                     previousAttemptFailed: false
                 ) else {
-                    AppLog.info("Password prompt cancelled by user")
+                    AppLog.info("Password prompt canceled by user")
                     return
                 }
                 password = entered
@@ -159,7 +159,7 @@ final class AutoExtractionController {
                         archiveName: archiveName,
                         previousAttemptFailed: true
                     ) else {
-                        AppLog.info("Password retry cancelled by user")
+                        AppLog.info("Password retry canceled by user")
                         return
                     }
                     password = entered
@@ -168,11 +168,11 @@ final class AutoExtractionController {
             }
         } catch {
             if cancelled || error is CancellationError {
-                AppLog.info("Extraction cancelled for \(archive.path)")
+                AppLog.info("Extraction canceled for \(archive.path)")
                 return
             }
             if let rarx = error as? RARxError, rarx.isCancellation {
-                AppLog.info("Extraction cancelled for \(archive.path): \(rarx.localizedDescription)")
+                AppLog.info("Extraction canceled for \(archive.path): \(rarx.localizedDescription)")
                 return
             }
             showFailure(error, archiveName: archiveName)

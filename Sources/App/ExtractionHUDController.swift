@@ -16,14 +16,14 @@ final class ExtractionHUDController {
     private var archiveName = ""
     private var currentProgress: ExtractionProgress?
     private var currentFile: String?
-    private var phaseText = "准备解压…"
+    private var phaseText = L("Preparing to extract…")
     private var wantsVisible = false
 
     func begin(archiveName: String, cancel: @escaping () -> Void) {
         guard AppSettings.showProgressDuringExtraction else { return }
         self.archiveName = archiveName
         self.cancelHandler = cancel
-        self.phaseText = "正在读取压缩包…"
+        self.phaseText = L("Reading archive…")
         self.currentProgress = nil
         self.currentFile = nil
         self.wantsVisible = true
@@ -121,7 +121,7 @@ final class ExtractionHUDController {
         icon.imageScaling = .scaleProportionallyUpOrDown
         icon.translatesAutoresizingMaskIntoConstraints = false
 
-        let title = NSTextField(labelWithString: "正在解压")
+        let title = NSTextField(labelWithString: L("Extracting"))
         title.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
         title.textColor = .labelColor
         title.lineBreakMode = .byTruncatingMiddle
@@ -133,7 +133,7 @@ final class ExtractionHUDController {
         percent.alignment = .right
         percent.translatesAutoresizingMaskIntoConstraints = false
 
-        let detail = NSTextField(labelWithString: "准备解压…")
+        let detail = NSTextField(labelWithString: L("Preparing…"))
         detail.font = NSFont.systemFont(ofSize: 11)
         detail.textColor = .secondaryLabelColor
         detail.lineBreakMode = .byTruncatingMiddle
@@ -148,7 +148,7 @@ final class ExtractionHUDController {
         progress.controlSize = .small
         progress.translatesAutoresizingMaskIntoConstraints = false
 
-        let cancel = NSButton(title: "取消", target: self, action: #selector(cancelAction))
+        let cancel = NSButton(title: L("Cancel"), target: self, action: #selector(cancelAction))
         cancel.isBordered = false
         cancel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         cancel.contentTintColor = .controlAccentColor
@@ -214,7 +214,7 @@ final class ExtractionHUDController {
 
     private func refreshContent() {
         guard panel != nil else { return }
-        titleLabel?.stringValue = "正在解压 \(truncate(archiveName, limit: 46))"
+        titleLabel?.stringValue = L("Extracting %@", truncate(archiveName, limit: 46))
         if let progress = currentProgress {
             let percent = Int((progress.fractionCompleted * 100).rounded())
             percentLabel?.stringValue = "\(min(100, max(0, percent)))%"
@@ -234,8 +234,8 @@ final class ExtractionHUDController {
     @objc private func cancelAction() {
         guard let cancelHandler else { return }
         cancelButton?.isEnabled = false
-        cancelButton?.title = "正在取消…"
-        detailLabel?.stringValue = "正在取消…"
+        cancelButton?.title = L("Canceling…")
+        detailLabel?.stringValue = L("Canceling…")
         cancelHandler()
     }
 

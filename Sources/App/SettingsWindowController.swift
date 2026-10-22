@@ -16,7 +16,7 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "RARx 设置"
+        window.title = L("RARx Settings")
         window.isReleasedWhenClosed = false
         window.center()
         window.backgroundColor = .windowBackgroundColor

@@ -6,7 +6,7 @@ BUILD="$ROOT/build"
 APP="$BUILD/RARx.app"
 ENGINE="$BUILD/engine/unrar"
 MIN_MACOS="13.0"
-VERSION="1.0.0"
+VERSION="1.1.0"
 
 cd "$ROOT"
 
@@ -45,6 +45,11 @@ chmod 755 "$APP/Contents/Resources/engine/unrar"
 cp "$ROOT/build/engine/LICENSE.txt" "$APP/Contents/Resources/engine/LICENSE.txt"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE.txt"
 cp "$ROOT/THIRD_PARTY_NOTICES.txt" "$APP/Contents/Resources/THIRD_PARTY_NOTICES.txt"
+for LOCALIZATION in en zh-Hans; do
+    mkdir -p "$APP/Contents/Resources/$LOCALIZATION.lproj"
+    cp "$ROOT/Resources/$LOCALIZATION.lproj/Localizable.strings" "$APP/Contents/Resources/$LOCALIZATION.lproj/Localizable.strings"
+    cp "$ROOT/Resources/$LOCALIZATION.lproj/InfoPlist.strings" "$APP/Contents/Resources/$LOCALIZATION.lproj/InfoPlist.strings"
+done
 cp "$BUILD/icons/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 cp "$BUILD/icons/RARFile.icns" "$APP/Contents/Resources/RARFile.icns"
 

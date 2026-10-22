@@ -261,7 +261,7 @@ struct CoreTests {
                 password: nil,
                 destination: destination
             ) { _ in }
-            check(result.warnings.contains { $0.contains("符号链接") }, "unsafe link warning surfaced")
+            check(result.warnings.contains { $0.localizedCaseInsensitiveContains("symbolic link") }, "unsafe link warning surfaced")
             let safeLink = destination.appendingPathComponent("safe-relative")
             let target = try? FileManager.default.destinationOfSymbolicLink(atPath: safeLink.path)
             check(target == "target.txt", "safe relative symlink preserved")

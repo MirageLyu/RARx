@@ -42,7 +42,7 @@ final class SafeExtractionService: @unchecked Sendable {
         } catch {
             try? fm.removeItem(at: stage)
             AppLog.error("Unable to create staging area: \(error.localizedDescription)")
-            throw RARxError.destinationNotWritable(destination.path + "（\(error.localizedDescription)）")
+            throw RARxError.destinationNotWritable(destination.path)
         }
 
         var stageURL = stage
@@ -227,7 +227,7 @@ final class SafeExtractionService: @unchecked Sendable {
                     try? FileManager.default.removeItem(at: url)
                     let relative = relativePath(url, stage: stage)
                     result.removedLinks.append(relative)
-                    result.warnings.append("已移除指向压缩包外部的符号链接：\(relative)")
+                    result.warnings.append(L("Removed a symbolic link that pointed outside the archive: %@", relative))
                     AppLog.warning("Removed escaping symlink \(relative) -> \(target)")
                 }
                 continue
@@ -237,7 +237,7 @@ final class SafeExtractionService: @unchecked Sendable {
                 try? FileManager.default.removeItem(at: url)
                 let relative = relativePath(url, stage: stage)
                 result.removedLinks.append(relative)
-                result.warnings.append("已跳过硬链接项目：\(relative)")
+                result.warnings.append(L("Skipped a hard-linked item: %@", relative))
                 AppLog.warning("Removed hard-linked staged file \(relative) with \(info.st_nlink) links")
             }
         }

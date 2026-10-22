@@ -10,7 +10,7 @@ final class SettingsModel: ObservableObject {
         didSet { AppSettings.playCompletionSound = playCompletionSound }
     }
     @Published private(set) var isDefault = false
-    @Published private(set) var currentHandlerName = "正在检查…"
+    @Published private(set) var currentHandlerName = L("Checking…")
     @Published private(set) var isApplying = false
     @Published private(set) var statusMessage: String?
 
@@ -37,8 +37,8 @@ final class SettingsModel: ObservableObject {
         isDefault = success
         currentHandlerName = DefaultHandlerManager.currentHandlerName()
         statusMessage = success
-            ? "已设为默认打开方式。Finder 双击 .rar 会静默解压。"
-            : "macOS 没有确认这次更改，请稍后重试。"
+            ? L("RARx is now the default handler. Finder will extract .rar files silently.")
+            : L("macOS did not confirm the change. Try again later.")
     }
 
     func openLogs() {
@@ -61,7 +61,7 @@ final class SettingsModel: ObservableObject {
         if let url = candidates.first {
             NSWorkspace.shared.open(url)
         } else {
-            UserPrompts.showNotice(title: "找不到许可文件", message: "请重新安装 RARx。")
+            UserPrompts.showNotice(title: L("Could not find the license file"), message: L("Reinstall RARx."))
         }
     }
 }
@@ -96,10 +96,10 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text("RARx")
                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                Text("双击 RAR，直接从 Finder 解压")
+                Text(L("Double-click a RAR archive in Finder to extract it."))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.secondary)
-                Text("版本 \(model.version)  ·  macOS 13+")
+                Text(L("Version %@ · macOS 13+", model.version))
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -119,13 +119,14 @@ struct SettingsView: View {
             }
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(model.isDefault ? "RARx 是默认 RAR 打开方式" : "尚未设为默认 RAR 打开方式")
+                Text(model.isDefault ? L("RARx is the default RAR handler") : L("RARx is not the default RAR handler"))
                     .font(.system(size: 14, weight: .semibold))
                 Text(model.isDefault
-                     ? "Finder 双击 .rar 会静默解压，不打开主窗口。"
-                     : "当前默认：\(model.currentHandlerName)")
+                     ? L("Finder extracts .rar files silently without opening a main window.")
+                     : L("Current default: %@", model.currentHandlerName))
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let message = model.statusMessage {
                     Text(message)
                         .font(.caption)
@@ -134,7 +135,7 @@ struct SettingsView: View {
                 }
             }
             Spacer()
-            Button(model.isDefault ? "重新注册" : "设为默认") {
+            Button(model.isDefault ? L("Re-register") : L("Set as Default")) {
                 model.applyDefaultHandler()
             }
             .buttonStyle(.borderedProminent)
@@ -154,14 +155,14 @@ struct SettingsView: View {
 
     private var behaviorSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("行为")
+            Text(L("Behavior"))
                 .font(.headline)
 
             VStack(spacing: 0) {
                 settingRow(
                     icon: "rectangle.bottomthird.inset.filled",
-                    title: "显示解压进度小窗",
-                    subtitle: "解压超过 1 秒时显示悬浮进度和取消按钮；默认关闭。"
+                    title: L("Show extraction progress panel"),
+                    subtitle: L("Floating progress and cancel after one second. Off by default.")
                 ) {
                     Toggle("", isOn: $model.showProgressDuringExtraction)
                         .labelsHidden()
@@ -171,8 +172,8 @@ struct SettingsView: View {
                 Divider().padding(.leading, 42)
                 settingRow(
                     icon: "speaker.wave.2",
-                    title: "解压完成后播放提示音",
-                    subtitle: "只在后台播放，不会弹出窗口。"
+                    title: L("Play a sound when extraction finishes"),
+                    subtitle: L("Played in the background without opening a window.")
                 ) {
                     Toggle("", isOn: $model.playCompletionSound)
                         .labelsHidden()
@@ -198,7 +199,7 @@ struct SettingsView: View {
             Image(systemName: "lock.shield")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.secondary)
-            Text("解压全程在本机完成。密码只通过受保护的进程管道传给引擎，不会写入命令行参数、日志或网络。同名文件会保留两者，不覆盖原文件。")
+            Text(L("Extraction runs entirely on this Mac. Passwords are passed to the engine through a protected process pipe and are never written to command-line arguments, logs, or the network. Existing files are kept and conflicting items are renamed."))
                 .font(.system(size: 11.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -212,14 +213,14 @@ struct SettingsView: View {
 
     private var footer: some View {
         HStack(spacing: 14) {
-            Button("打开日志") { model.openLogs() }
+            Button(L("Open Logs")) { model.openLogs() }
                 .buttonStyle(.link)
-            Button("RARx 许可") { model.openAppLicense() }
+            Button(L("RARx License")) { model.openAppLicense() }
                 .buttonStyle(.link)
-            Button("第三方许可") { model.openLicenses() }
+            Button(L("Third-Party Notices")) { model.openLicenses() }
                 .buttonStyle(.link)
             Spacer()
-            Text("UnRAR 7.13  ·  © Alexander Roshal")
+            Text("UnRAR 7.13 · © Alexander Roshal")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
@@ -242,6 +243,7 @@ struct SettingsView: View {
                 Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
             accessory()

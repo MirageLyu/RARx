@@ -7,13 +7,28 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-22
+
+### Added
+
+- English and Simplified Chinese interface localization that follows the macOS
+  preferred language.
+- Automatic fallback to English for unsupported system languages.
+- Localization key and format-specifier validation in the test suite.
+- Architecture, security, contribution, and changelog documentation.
+- GitHub issue templates and a pull request template.
+
 ### Changed
 
 - Rewrote the README and project documentation in English.
-- Added architecture, security, contribution, and changelog documents.
-- Added issue and pull request templates.
-- Renamed the third-party notice file and linked it from the in-app license
-  buttons.
+- Renamed the third-party notice file to `THIRD_PARTY_NOTICES.txt`.
+- Updated the application version to 1.1.0 (build 2).
+
+### Fixed
+
+- Password and error prompts are centered on the active display and moved to
+  the active Space before presentation.
+- Settings descriptions wrap correctly at longer English lengths.
 
 ## [1.0.0] - 2026-10-22
 
@@ -49,10 +64,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Documentation
 
-- Added project documentation, architecture notes, security policy,
-  contribution guidelines, and test instructions.
+- Added the initial README.
 - Added the MIT license for original RARx code and separate UnRAR third-party
   notices.
 
-[Unreleased]: https://github.com/MirageLyu/RARx/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/MirageLyu/RARx/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/MirageLyu/RARx/releases/tag/v1.1.0
 [1.0.0]: https://github.com/MirageLyu/RARx/releases/tag/v1.0.0

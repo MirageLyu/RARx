@@ -72,10 +72,25 @@ Please preserve these constraints unless the change explicitly revisits them:
   diagnostic log, not in place of a clear user message.
 - Do not add debug output that may contain passwords, archive contents, or
   unredacted user data.
+- Add user-facing strings through `L(...)`; do not hardcode display text in
+  AppKit or SwiftUI views.
 
-The application UI is currently in Simplified Chinese. English localization and
-other translations are welcome, but should be submitted as a focused change with
-all user-facing strings covered.
+The application UI follows the macOS preferred language and currently supports
+English and Simplified Chinese. User-facing strings use English source text as
+their localization key and are wrapped with `L(...)`. Add the English entry to
+`Resources/en.lproj/Localizable.strings` and the Simplified Chinese translation
+to `Resources/zh-Hans.lproj/Localizable.strings`.
+
+Run the localization check after changing a string:
+
+```bash
+swift scripts/check-localizations.swift .
+```
+
+The check verifies that both localization files contain every key used in
+`Sources` and that format specifiers match. Additional languages are welcome as
+focused changes that include all user-facing strings and an updated validation
+baseline.
 
 ## Tests
 
@@ -84,7 +99,8 @@ all user-facing strings covered.
   file merging as security-sensitive code.
 - Do not add personal archives or passwords to the repository. Use a minimal
   synthetic fixture that demonstrates the case.
-- Run `./scripts/test.sh` before opening a pull request.
+- Run `./scripts/test.sh` before opening a pull request. It includes the
+  localization check, core tests, and Finder integration tests.
 - If a change cannot be covered by the existing suite, explain why in the pull
   request.
 

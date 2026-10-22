@@ -17,11 +17,12 @@ Finder, the process exits after the queue is empty.
 
 ## Project status
 
-- Version 1.0.0.
+- Version 1.1.0.
 - Tested on macOS 26.6.2 on Apple Silicon.
 - Universal application and engine (`arm64` and `x86_64`).
-- Documentation and command-line output are in English. The application UI is
-  currently in Simplified Chinese.
+- Documentation and command-line output are in English. The application UI
+  follows the macOS preferred language and is localized for English and
+  Simplified Chinese.
 
 ## Documentation
 
@@ -52,6 +53,9 @@ Finder, the process exits after the queue is empty.
   appears and offers cancellation. It is disabled by default.
 - **Diagnostics.** Failures and warnings are logged with enough context to
   investigate the extraction. Passwords are never logged.
+- **Localized interface.** The app follows the system language and includes
+  English and Simplified Chinese translations. Unsupported languages fall back
+  to English.
 
 ## Requirements
 
@@ -111,8 +115,10 @@ distribution outside your own machine.
 APP=/Applications/RARx.app ./scripts/test.sh
 ```
 
-The suite has two parts:
+The suite has three parts:
 
+- A localization check that verifies the English and Simplified Chinese keys
+  match the strings used in the source and preserve format specifiers.
 - A headless core test binary covering archive inspection, extraction,
   passwords, multi-volume handling, conflict resolution, path validation, and
   staging cleanup.
@@ -205,7 +211,7 @@ want to remove them.
 ```text
 Sources/Core/      Extraction engine, process handling, staging, merging, safety
 Sources/App/       Finder events, background queue, prompts, progress UI, settings
-Resources/         Info.plist
+Resources/         Info.plist and localization resources
 Tests/             Core tests and checked-in RAR fixtures
 scripts/           Build, icon generation, installation, and test scripts
 vendor/unrar/      UnRAR source and license

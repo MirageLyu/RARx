@@ -65,7 +65,7 @@ enum DefaultHandlerManager {
     }
 
     static func currentHandlerName() -> String {
-        guard let url = currentHandlerURL() else { return "未设置" }
+        guard let url = currentHandlerURL() else { return L("Not Set") }
         if isAppURL(url) { return "RARx" }
         if let bundle = Bundle(url: url) {
             return (bundle.localizedInfoDictionary?["CFBundleDisplayName"] as? String)

@@ -19,6 +19,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
+echo "== Localization checks =="
+swift "$ROOT/scripts/check-localizations.swift" "$ROOT"
+
 echo "== Core extraction tests =="
 swiftc -swift-version 5 -Onone -g -parse-as-library \
     -target "$(uname -m)-apple-macos13.0" \

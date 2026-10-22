@@ -45,13 +45,13 @@ enum FileMerger {
             )
         } catch {
             throw MergeFailure(
-                detail: "无法读取临时解压目录：\(error.localizedDescription)",
+                detail: L("Could not read the staging directory: %@", error.localizedDescription),
                 rollbackSucceeded: true
             )
         }
 
         guard !children.isEmpty else {
-            throw MergeFailure(detail: "临时解压目录中没有文件。", rollbackSucceeded: true)
+            throw MergeFailure(detail: L("The staging directory is empty."), rollbackSucceeded: true)
         }
 
         let fileCount = countFiles(in: stage)
@@ -63,7 +63,7 @@ enum FileMerger {
             }
         } catch {
             let rollback = rollback(context.moves)
-            let detail = "写入目标文件夹时出错：\(error.localizedDescription)"
+            let detail = L("An error occurred while writing to the destination: %@", error.localizedDescription)
             if rollback.error != nil {
                 AppLog.error("Commit rollback failed: \(rollback.error!.localizedDescription)")
             }

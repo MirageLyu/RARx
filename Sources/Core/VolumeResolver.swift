@@ -60,9 +60,13 @@ enum VolumeResolver {
 
         if let first {
             throw RARxError.missingVolume(
-                "找不到 \(base).part1.rar。同目录中最早的分卷是 \(first.url.lastPathComponent)。"
+                L(
+                    "Could not find %@.part1.rar. The earliest volume in this folder is %@.",
+                    base,
+                    first.url.lastPathComponent
+                )
             )
         }
-        throw RARxError.missingVolume("找不到 \(base).part1.rar。请确认所有分卷都位于同一文件夹。")
+        throw RARxError.missingVolume(L("Could not find %@.part1.rar. Make sure all volumes are in the same folder.", base))
     }
 }

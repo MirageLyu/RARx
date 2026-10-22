@@ -1,7 +1,7 @@
 import Foundation
 
-/// User-facing failures. The Chinese copy is intentionally friendly; raw unrar
-/// diagnostics are kept separately so the log still contains actionable detail.
+/// User-facing failures. Raw UnRAR diagnostics are kept separately so the log
+/// still contains actionable detail even when the friendly message is localized.
 enum RARxError: LocalizedError {
     case engineMissing(String)
     case archiveMissing(String)
@@ -23,73 +23,77 @@ enum RARxError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .engineMissing:
-            return "RAR 解压引擎缺失"
+            return L("RAR extraction engine unavailable")
         case .archiveMissing:
-            return "找不到压缩包"
+            return L("Archive not found")
         case .notARARArchive:
-            return "这不是有效的 RAR 压缩包"
+            return L("Not a valid RAR archive")
         case .passwordRequired:
-            return "压缩包需要密码"
+            return L("Password required")
         case .incorrectPassword:
-            return "压缩包密码不正确"
+            return L("Incorrect password")
         case .passwordCancelled:
-            return "已取消输入密码"
+            return L("Password entry canceled")
         case .archiveEmpty:
-            return "压缩包是空的"
+            return L("Archive is empty")
         case .invalidArchive:
-            return "压缩包已损坏或格式不受支持"
+            return L("Archive is damaged or unsupported")
         case .missingVolume:
-            return "缺少分卷文件"
+            return L("Missing volume")
         case .unrarFailed:
-            return "解压失败"
+            return L("Extraction failed")
         case .destinationUnavailable:
-            return "无法使用目标文件夹"
+            return L("Destination folder unavailable")
         case .destinationNotWritable:
-            return "没有权限写入目标文件夹"
+            return L("Cannot write to destination folder")
         case .insufficientSpace:
-            return "磁盘空间不足"
+            return L("Not enough disk space")
         case .unsafeArchive:
-            return "压缩包包含不安全的文件路径"
+            return L("Archive contains an unsafe path")
         case .commitFailed:
-            return "无法完成文件写入"
+            return L("Could not complete the file write")
         case .cancelled:
-            return "已取消解压"
+            return L("Extraction canceled")
         }
     }
 
     var failureReason: String? {
         switch self {
         case .engineMissing(let path):
-            return "内置 unrar 引擎不可执行：\(path)"
+            return L("The bundled UnRAR engine is not executable: %@", path)
         case .archiveMissing(let path):
-            return "文件不存在：\(path)"
+            return L("File does not exist: %@", path)
         case .notARARArchive(let detail):
-            return detail.isEmpty ? "没有找到 RAR 文件头。" : detail
+            return detail.isEmpty ? L("No RAR signature was found.") : detail
         case .passwordRequired:
-            return "该压缩包使用密码加密。"
+            return L("This archive is password-protected.")
         case .incorrectPassword:
-            return "请重新输入压缩包密码。"
+            return L("Enter the archive password again.")
         case .passwordCancelled:
             return nil
         case .archiveEmpty:
-            return "压缩包内没有可解压的项目。"
+            return L("The archive contains no extractable items.")
         case .invalidArchive(let detail):
-            return detail
+            return detail.isEmpty ? L("The archive is damaged or uses an unsupported format.") : detail
         case .missingVolume(let detail):
-            return detail
+            return detail.isEmpty ? L("Make sure all volumes are in the same folder.") : detail
         case .unrarFailed(_, let detail):
             return detail
         case .destinationUnavailable(let detail):
             return detail
         case .destinationNotWritable(let path):
-            return "无法写入 \(path)"
+            return L("Cannot write to %@", path)
         case .insufficientSpace(let needed, let available):
-            return "预计需要 \(ByteCountFormatter.string(fromByteCount: needed, countStyle: .file))，当前可用 \(ByteCountFormatter.string(fromByteCount: available, countStyle: .file))。"
+            return L(
+                "Estimated size: %@. Available: %@.",
+                ByteCountFormatter.string(fromByteCount: needed, countStyle: .file),
+                ByteCountFormatter.string(fromByteCount: available, countStyle: .file)
+            )
         case .unsafeArchive(let detail):
             return detail
         case .commitFailed(let detail, let stage, _):
             if let stage {
-                return "\(detail)\n未完成的临时文件保留在：\(stage.path)"
+                return detail + "\n" + L("Incomplete staging files were kept at: %@", stage.path)
             }
             return detail
         case .cancelled:
@@ -126,19 +130,19 @@ func byteString(_ value: Int64) -> String {
 
 func humanDescription(for status: Int32) -> String {
     switch status {
-    case 0: return "成功"
-    case 1: return "警告"
-    case 2: return "严重错误"
-    case 3: return "校验和错误"
-    case 4: return "压缩包被锁定"
-    case 5: return "写入错误"
-    case 6: return "打开文件失败"
-    case 7: return "命令行错误"
-    case 8: return "内存不足"
-    case 9: return "创建文件失败"
-    case 10: return "没有文件"
-    case 11: return "密码错误"
-    case 12: return "文件打开失败"
-    default: return "未知错误（\(status)）"
+    case 0: return L("Success")
+    case 1: return L("Warning")
+    case 2: return L("Fatal error")
+    case 3: return L("Checksum error")
+    case 4: return L("Archive is locked")
+    case 5: return L("Write error")
+    case 6: return L("Could not open file")
+    case 7: return L("Command-line error")
+    case 8: return L("Out of memory")
+    case 9: return L("Could not create file")
+    case 10: return L("No files")
+    case 11: return L("Incorrect password")
+    case 12: return L("File open failed")
+    default: return L("Unknown error (%d)", status)
     }
 }

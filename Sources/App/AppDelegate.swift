@@ -115,8 +115,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             AppLog.warning("Open event contained no supported, readable .rar files")
             if settingsController == nil {
                 UserPrompts.showNotice(
-                    title: "无法打开",
-                    message: "RARx 只处理存在且可读取的 .rar 压缩包。"
+                    title: L("Cannot Open"),
+                    message: L("RARx only handles readable .rar archives.")
                 )
                 scheduleIdleTermination()
             }
@@ -212,29 +212,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         mainMenu.addItem(appMenuItem)
         let appMenu = NSMenu()
         appMenuItem.submenu = appMenu
-        appMenu.addItem(withTitle: "关于 RARx", action: #selector(showAbout), keyEquivalent: "")
+        appMenu.addItem(withTitle: L("About RARx"), action: #selector(showAbout), keyEquivalent: "")
             .target = self
         appMenu.addItem(.separator())
-        let settingsItem = appMenu.addItem(withTitle: "设置…", action: #selector(showSettingsAction), keyEquivalent: ",")
+        let settingsItem = appMenu.addItem(withTitle: L("Settings…"), action: #selector(showSettingsAction), keyEquivalent: ",")
         settingsItem.target = self
         let defaultItem = appMenu.addItem(
-            withTitle: "设为默认 RAR 打开方式",
+            withTitle: L("Set as Default RAR Handler"),
             action: #selector(setDefaultAction),
             keyEquivalent: ""
         )
         defaultItem.target = self
-        appMenu.addItem(withTitle: "打开日志", action: #selector(openLogsAction), keyEquivalent: "")
+        appMenu.addItem(withTitle: L("Open Logs"), action: #selector(openLogsAction), keyEquivalent: "")
             .target = self
         appMenu.addItem(.separator())
         let hideItem = appMenu.addItem(
-            withTitle: "隐藏 RARx",
+            withTitle: L("Hide RARx"),
             action: #selector(NSApplication.hide(_:)),
             keyEquivalent: "h"
         )
         hideItem.target = NSApp
         appMenu.addItem(.separator())
         let quitItem = appMenu.addItem(
-            withTitle: "退出 RARx",
+            withTitle: L("Quit RARx"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -242,27 +242,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let editMenuItem = NSMenuItem()
         mainMenu.addItem(editMenuItem)
-        let editMenu = NSMenu(title: "编辑")
+        let editMenu = NSMenu(title: L("Edit"))
         editMenuItem.submenu = editMenu
-        editMenu.addItem(withTitle: "撤销", action: Selector(("undo:")), keyEquivalent: "z")
-        editMenu.addItem(withTitle: "重做", action: Selector(("redo:")), keyEquivalent: "Z")
+        editMenu.addItem(withTitle: L("Undo"), action: Selector(("undo:")), keyEquivalent: "z")
+        editMenu.addItem(withTitle: L("Redo"), action: Selector(("redo:")), keyEquivalent: "Z")
         editMenu.addItem(.separator())
-        editMenu.addItem(withTitle: "剪切", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
-        editMenu.addItem(withTitle: "拷贝", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
-        editMenu.addItem(withTitle: "粘贴", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
-        editMenu.addItem(withTitle: "全选", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        editMenu.addItem(withTitle: L("Cut"), action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: L("Copy"), action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: L("Paste"), action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: L("Select All"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
 
         let windowMenuItem = NSMenuItem()
         mainMenu.addItem(windowMenuItem)
-        let windowMenu = NSMenu(title: "窗口")
+        let windowMenu = NSMenu(title: L("Window"))
         windowMenuItem.submenu = windowMenu
         windowMenu.addItem(
-            withTitle: "最小化",
+            withTitle: L("Minimize"),
             action: #selector(NSWindow.performMiniaturize(_:)),
             keyEquivalent: "m"
         )
         windowMenu.addItem(
-            withTitle: "前置全部窗口",
+            withTitle: L("Bring All to Front"),
             action: #selector(NSApplication.arrangeInFront(_:)),
             keyEquivalent: ""
         )
@@ -272,8 +272,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func showAbout() {
         NSApp.setActivationPolicy(.regular)
+        let creditsText = [
+            L("Double-click a RAR archive to extract it silently into the same folder."),
+            L("The original RARx code is released under the MIT License."),
+            "https://github.com/MirageLyu/RARx",
+            L("UnRAR 7.13 is Copyright © Alexander Roshal. RAR is a trademark of RARLAB.")
+        ].joined(separator: "\n\n")
         let credits = NSAttributedString(
-            string: "双击 RAR，静默解压到当前文件夹。\n\nRARx 原创代码以 MIT 许可发布。\nhttps://github.com/MirageLyu/RARx\n\nUnRAR 7.13 版权归 Alexander Roshal 所有。RAR 是 RARLAB 的商标。",
+            string: creditsText,
             attributes: [
                 .font: NSFont.systemFont(ofSize: 11),
                 .foregroundColor: NSColor.secondaryLabelColor
@@ -296,10 +302,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let success = DefaultHandlerManager.setAsDefault()
         settingsController?.model.refreshHandler()
         UserPrompts.showNotice(
-            title: success ? "已设为默认 RAR 打开方式" : "设置未生效",
+            title: success
+                ? L("RARx Is Now the Default RAR Handler")
+                : L("The Change Was Not Confirmed"),
             message: success
-                ? "Finder 双击 .rar 后将由 RARx 静默解压。"
-                : "macOS 没有确认这次更改。请稍后在设置中重试。"
+                ? L("Finder will extract .rar files silently with RARx.")
+                : L("macOS did not confirm the change. Try again later.")
         )
     }
 

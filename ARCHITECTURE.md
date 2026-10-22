@@ -163,6 +163,8 @@ unless the user enables it.
 - `scripts/test.sh` compiles and runs the core suite, then launches the real
   application through `open` to verify Finder-style behavior and LaunchServices
   registration.
+- The localization check verifies that every `L(...)` key used in the source
+  exists in both `en.lproj` and `zh-Hans.lproj`, and that format specifiers match.
 - The GUI integration tests require a logged-in macOS session.
 - Archive fixtures are small and checked into the repository. They contain no
   user data.
@@ -174,7 +176,8 @@ unless the user enables it.
 - Replacing files is intentionally not supported; the merge is always
   non-destructive.
 - The app does not provide archive browsing or selective extraction.
-- The application UI is currently Simplified Chinese; the extraction and
-  installation tooling is in English.
+- The application UI follows the macOS preferred language and is localized for
+  English and Simplified Chinese. Documentation and command-line tooling are in
+  English.
 - Distribution as a notarized build is out of scope for the repository. The
   build script produces an ad-hoc signed local build.

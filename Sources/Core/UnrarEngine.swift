@@ -115,7 +115,7 @@ final class UnrarEngine: @unchecked Sendable {
             throw RARxError.archiveMissing(archive.path)
         }
         guard archive.pathExtension.lowercased() == "rar" else {
-            throw RARxError.notARARArchive("文件扩展名不是 .rar")
+            throw RARxError.notARARArchive(L("The file extension is not .rar."))
         }
     }
 
@@ -350,7 +350,7 @@ final class UnrarEngine: @unchecked Sendable {
                 let warnings = Self.warnings(from: allOutput)
                 return RawExtraction(
                     status: output.status,
-                    warnings: warnings.isEmpty ? ["解压引擎报告了非致命警告。"] : warnings,
+                    warnings: warnings.isEmpty ? [L("The extraction engine reported a non-fatal warning.")] : warnings,
                     skippedLinks: Self.skippedLinks(from: allOutput),
                     detail: detail
                 )
@@ -363,13 +363,13 @@ final class UnrarEngine: @unchecked Sendable {
             if lower.contains("cannot find volume")
                 || lower.contains("you need to start extraction from a previous volume")
                 || lower.contains("next volume is required") {
-                throw RARxError.missingVolume(detail.isEmpty ? "请确认所有分卷文件都在同一文件夹。" : detail)
+                throw RARxError.missingVolume(detail.isEmpty ? L("Make sure all volumes are in the same folder.") : detail)
             }
             if lower.contains("password") {
                 throw password == nil ? RARxError.passwordRequired : RARxError.incorrectPassword
             }
             if output.status == 3 || lower.contains("crc failed") || lower.contains("checksum error") {
-                throw RARxError.invalidArchive(detail.isEmpty ? "压缩包校验失败。" : detail)
+                throw RARxError.invalidArchive(detail.isEmpty ? L("The archive failed its integrity check.") : detail)
             }
             if lower.contains("permission denied") || lower.contains("operation not permitted") {
                 throw RARxError.destinationNotWritable(stage.path)
@@ -425,7 +425,7 @@ final class UnrarEngine: @unchecked Sendable {
         var results: [String] = []
         let links = skippedLinks(from: output)
         for link in links {
-            results.append("已跳过不安全的符号链接：\(link)")
+            results.append(L("Skipped an unsafe symbolic link: %@", link))
         }
         let patterns = [
             #"Cannot set file time for (.+)"#,
@@ -437,7 +437,7 @@ final class UnrarEngine: @unchecked Sendable {
             for match in regex.matches(in: output, range: range) {
                 guard match.numberOfRanges > 1, let subrange = Range(match.range(at: 1), in: output) else { continue }
                 let item = output[subrange].trimmingCharacters(in: .whitespacesAndNewlines)
-                let message = "无法完整恢复文件属性：\(item)"
+                let message = L("Could not fully restore file attributes: %@", item)
                 if !results.contains(message) { results.append(message) }
             }
         }
