@@ -5,3 +5,5 @@ DerivedData/
 *.dSYM/
 *.log
 .DS_Store
+vendor/unrar/unrar/*.o
+vendor/unrar/unrar/unrar

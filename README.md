@@ -1,41 +1,70 @@
 # RARx
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-black.svg)](#构建)
+[![Platform: macOS 13+](https://img.shields.io/badge/platform-macOS%2013%2B-lightgrey.svg)](#requirements)
 
-[github.com/MirageLyu/RARx](https://github.com/MirageLyu/RARx)
+RARx is an unofficial, native macOS RAR extractor built around a Finder-first
+workflow. Double-click a `.rar` archive in Finder and RARx extracts it into the
+directory containing the archive, without opening a main window or asking where
+to put the files.
 
-一个面向 macOS 的轻量、后台式 RAR 解压器。它把解压交互做成接近系统归档工具的方式：
+RARx runs as a background LaunchServices application (`LSUIElement`). It opens a
+floating password prompt only for encrypted archives. The app surfaces only the
+prompts, failures, and warnings that require user attention. When launched by
+Finder, the process exits after the queue is empty.
 
-> **在 Finder 中双击 `.rar` → 直接解压到压缩包所在文件夹 → 不打开主窗口、不询问目标位置，完成后退出。**
+> RARx is not affiliated with RARLAB. RAR is a trademark of RARLAB.
 
-安装后，RARx 会注册为当前用户的默认 `.rar` 打开方式，安装位置为 `/Applications/RARx.app`。
+## Project status
 
-## 交互
+- Version 1.0.0.
+- Tested on macOS 26.6.2 on Apple Silicon.
+- Universal application and engine (`arm64` and `x86_64`).
+- Documentation and command-line output are in English. The application UI is
+  currently in Simplified Chinese.
 
-- 默认完全静默：不显示主窗口、Dock 弹窗或完成对话框。
-- 加密压缩包只在需要时显示一个浮动密码框；输入密码后继续在后台解压。
-- 损坏、缺卷、权限不足等异常才显示浮动错误提示。
-- 同名文件**永不覆盖**：自动保留两者，追加 ` 2`、` 3` 等后缀。
-- 双击分卷的 `part2.rar` 会自动从 `part1.rar` 开始解压。
-- 多个 `.rar` 同时打开会按顺序排队处理。
-- 可选“解压进度小窗”（默认关闭）：解压超过 1 秒时在屏幕右下角显示非激活式进度条和取消按钮，不抢焦点。
-- 手动打开 RARx 才会显示设置窗口；正常 Finder 解压不会出现。
+## Documentation
 
-## 功能与质量
+- [Architecture](ARCHITECTURE.md)
+- [Security policy](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 
-- 内置 **UnRAR 7.13**（universal：arm64 + x86_64），支持 RAR4 / RAR5、加密头、加密文件、分卷、Unicode 文件名和符号链接。
-- 原生 Swift/AppKit + SwiftUI 设置界面，无 Electron/浏览器运行时。
-- 使用隐藏 staging 目录解压，全部成功后才合并到目标目录；失败或取消不会留下半成品或覆盖原文件。
-- 子进程通过 `/usr/bin/sandbox-exec` 限制为只能写 staging 目录，配合路径规范化、越界符号链接检查和硬链接拒绝。
-- 密码通过进程 stdin 传给 `unrar`，不出现在命令行参数、日志或网络请求中。
-- 崩溃遗留的 staging 目录带有 PID 锁，后续解压会自动识别并清理。
-- 磁盘空间预检；写入失败会回滚已合并的文件。
-- 全量诊断日志（不含密码）：`~/Library/Logs/RARx/RARx.log`。
-- 自适应深色/浅色外观，自带应用图标和 `.rar` 文档图标。
-- 程序化核心断言 + Finder 路径端到端测试；安装脚本显式注册并验证 LaunchServices 默认处理器。
+## Features
 
-## 安装
+- **Finder-first extraction.** Opening one or more `.rar` files starts a
+  background queue. Each archive is extracted beside its own `.rar` file.
+- **No main window.** By default, normal extraction does not show a window,
+  dialog, or confirmation. The Finder-launched process exits when processing is
+  complete.
+- **Encrypted archives.** Password-protected headers and file data are
+  supported. A password prompt appears only when a password is required.
+- **Multi-volume archives.** Opening `name.part2.rar` uses `name.part1.rar` as
+  the starting volume. Missing volumes are reported as errors.
+- **Non-destructive conflicts.** Existing files are never overwritten.
+  Conflicting incoming files are renamed with Finder-style suffixes
+  (`name 2.ext`, `name 3.ext`). Directories are merged.
+- **Safe staging.** Extraction happens in a hidden staging directory inside the
+  destination. Fatal errors before the commit phase and cancellation leave the
+  destination unchanged.
+- **Optional progress window.** A compact, non-activating progress panel can be
+  enabled in Settings. When extraction lasts longer than one second, the panel
+  appears and offers cancellation. It is disabled by default.
+- **Diagnostics.** Failures and warnings are logged with enough context to
+  investigate the extraction. Passwords are never logged.
+
+## Requirements
+
+- macOS 13 or later.
+- To build: the Swift toolchain included with the Xcode Command Line Tools or
+  Xcode, plus the standard macOS command-line tools used by the build scripts.
+- To install into `/Applications`: write access to `/Applications` for the
+  current user.
+
+The UnRAR source is vendored in [`vendor/unrar`](vendor/unrar), so building does
+not require network access.
+
+## Install
 
 ```bash
 git clone https://github.com/MirageLyu/RARx.git
@@ -43,93 +72,192 @@ cd RARx
 ./scripts/install.sh
 ```
 
-安装脚本会：
+The installer performs these steps:
 
-1. 检查/构建 `build/RARx.app`；
-2. 停止正在运行的 RARx；
-3. 安装到 `/Applications/RARx.app`；
-4. 刷新 LaunchServices，注销 `build/` 下的开发副本；
-5. 设置 `com.rarlab.rar-archive` 的默认处理器并验证。
+1. Uses an existing build, or builds the app if `build/RARx.app` is missing.
+2. Stops any running RARx process.
+3. Installs the bundle at `/Applications/RARx.app`.
+4. Refreshes LaunchServices and unregisters the development copy.
+5. Sets RARx as the default handler for `com.rarlab.rar-archive` for the current
+   user, then verifies the registration.
 
-安装完成后直接在 Finder 双击任意 `.rar` 即可。
+Installing changes the current user's default `.rar` handler. Review
+[`scripts/install.sh`](scripts/install.sh) before running it if you prefer to
+perform these steps manually.
 
-## 构建
-
-要求 macOS 13+ 和 Command Line Tools（`swiftc`、`lipo`、`iconutil`）。
+## Build
 
 ```bash
-./scripts/build-engine.sh   # 可选：没有 build/engine/unrar 时自动执行
+./scripts/build-engine.sh   # Optional; build-app.sh invokes it when needed.
 ./scripts/build-app.sh
 ```
 
-产物：
+Artifacts:
 
-- `build/RARx.app` — 已启用 hardened runtime 的 ad-hoc 签名通用 App；
-- `build/engine/unrar` — 从 `vendor/unrar` 源码构建的 universal UnRAR；
-- `build/icons/` — 生成的 `.icns` 资源。
+- `build/RARx.app`: the assembled, ad-hoc signed application.
+- `build/engine/unrar`: the universal UnRAR executable.
+- `build/icons/`: generated application and document icons.
 
-## 测试
+The app is built with the hardened runtime and an ad-hoc signature. It is not
+notarized. macOS may block the app when it is downloaded from the internet or
+copied to another Mac. Use a Developer ID certificate and notarization for
+distribution outside your own machine.
+
+## Tests
 
 ```bash
 ./scripts/test.sh
-# 已安装版本（包含默认打开方式测试）：
+# Also test the installed copy and its LaunchServices association:
 APP=/Applications/RARx.app ./scripts/test.sh
 ```
 
-测试覆盖：正常解压、Unicode/空格路径、空目录、同名冲突、嵌套合并、加密头、加密文件、错误密码、分卷从 part2 进入、缺卷、损坏/截断包、不安全符号链接、硬链接、staging 清理、密码不落日志，以及 Finder 双击、批量打开和默认处理器。
+The suite has two parts:
 
-`Tests/Fixtures` 中的 RAR 样本仅用于测试，不会进入 App bundle。
+- A headless core test binary covering archive inspection, extraction,
+  passwords, multi-volume handling, conflict resolution, path validation, and
+  staging cleanup.
+- Finder-level integration tests that exercise the real application through
+  `open` and LaunchServices. These tests require an active, logged-in macOS GUI
+  session.
 
-## 安全设计
+The RAR fixtures are checked in under [`Tests/Fixtures`](Tests/Fixtures). They
+contain no user data.
 
-1. **不覆盖**：staging 成功后才合并；冲突项重命名，不使用 `FileManager.replaceItem`。
-2. **写隔离**：解压子进程由 sandbox 限制只能写 staging，即使归档构造了 `../` 或符号链接穿越也无法写出目标目录。
-3. **链接校验**：提交前移除指向 staging 外部的符号链接和硬链接项目。
-4. **密码隔离**：`-p` + stdin，避免 `ps` 泄露；日志明确不记录密码和 stdin。
-5. **失败清理**：取消/错误自动删除 staging；进程崩溃则通过 PID 锁在下次运行清理。
-6. **回滚**：合并中途失败时按操作日志逐项回滚。
-7. **无 shell**：所有子进程使用 `Process` 参数数组，不经过 shell 拼接。
+## Usage
 
-## 目录
+### Finder
 
-```text
-Sources/Core/     引擎封装、进程运行、进度、staging、合并、安全检查
-Sources/App/      Finder 事件、后台任务、密码/错误提示、HUD、设置
-Resources/        Info.plist、第三方许可
-scripts/          构建、图标、安装、测试
-Tests/            核心测试与 RAR fixtures
-vendor/unrar/     UnRAR 源码（官方 freeware 许可）
-```
+1. Double-click a `.rar` file.
+2. RARx extracts it into the directory containing the archive.
+3. If the archive is encrypted, enter the password in the floating prompt.
+4. The process exits when the queue is empty.
 
-## 日志与诊断
+No destination picker is shown. To extract to a different location, move the
+archive to that directory before opening it.
 
-- 日志：`~/Library/Logs/RARx/RARx.log`（超过 2 MB 自动轮转）
-- 设置窗口 → “打开日志”
-- 错误提示 → “查看日志”
+### Settings
 
-## 卸载
+Launch RARx from `/Applications` to open Settings. The settings window can:
+
+- Confirm or change the default `.rar` handler.
+- Enable or disable the optional progress panel.
+- Enable or disable the completion sound.
+- Open the log directory or the license notices.
+
+## Security
+
+RARx treats archive contents as untrusted input. The main safeguards are:
+
+- Extraction runs in a hidden staging directory under the destination.
+- On current macOS versions, the UnRAR process is confined with
+  `/usr/bin/sandbox-exec` so that it can write only inside the staging
+  directory. If `sandbox-exec` is unavailable, RARx logs a warning and falls
+  back to staging-only protection.
+- Staged symbolic links that point outside the staging directory are removed
+  before the result is merged.
+- Staged files with multiple hard links are rejected.
+- Passwords are sent to UnRAR through stdin, never through command-line
+  arguments. They are not written to logs.
+- External commands are executed with argument arrays, not through a shell.
+- Failed commits are rolled back where possible. If rollback itself fails, the
+  staging directory is preserved and its path is reported to the user.
+
+RARx does not use App Sandbox. The write confinement described above applies
+only to the UnRAR child process; the application itself needs access to the
+directory containing the archive in order to stage and merge files.
+
+For vulnerability reporting and the full threat model, see
+[`SECURITY.md`](SECURITY.md).
+
+## Privacy
+
+RARx does not contain telemetry, analytics, or update checks, and it does not
+make network requests. Archive contents, passwords, and filenames stay on the
+local machine. Diagnostic logs contain archive paths and UnRAR output, but never
+passwords.
+
+## Logs
+
+- Path: `~/Library/Logs/RARx/RARx.log`
+- Rotation: the current log is rotated to `RARx.log.1` at 2 MB.
+- Passwords are not logged.
+
+Logs may contain archive paths and filenames. Review them before sharing a log
+in a public issue.
+
+## Uninstall
 
 ```bash
 pkill -x RARx 2>/dev/null || true
 rm -rf /Applications/RARx.app
 ```
 
-卸载后 macOS 可能仍保留“默认打开方式”记录；重新安装或对任意 `.rar` 使用“打开方式 → 其他”选择其他应用即可覆盖。
+The LaunchServices handler association is stored per user and is not removed by
+deleting the app. To use another application, select it for a `.rar` file in
+Finder under **Open With > Other...**. Re-run the installer to restore RARx as
+the handler.
 
-## 已知限制
+Logs are not removed by the commands above. Delete `~/Library/Logs/RARx` if you
+want to remove them.
 
-- **不创建 RAR**：RARx 只解压。UnRAR 许可证禁止用其源码开发 RAR 兼容压缩器。
-- **签名与分发**：当前为 ad-hoc 签名（已启用 hardened runtime），适合本机/内部分发；面向公网分发还需 Developer ID Application 签名、notarization，并替换 `scripts/build-app.sh` 中的签名步骤。
-- **Intel 兼容性**：App 与引擎均包含 x86_64 slice，但本机为 Apple Silicon，未在 Intel Mac 或 Rosetta 下做运行时验证。
-- **同名策略固定为“保留两者”**，暂未提供静默覆盖选项。
-- **首次访问受保护目录**：从桌面/文稿/下载解压时，macOS 可能弹出一次文件夹访问授权（TCC），这是系统行为。
-- **密码框聚焦**：macOS 14+ 的协作式激活机制可能不会让后台 App 主动抢焦点；密码框会浮到最前，点一下即可输入。
-- **UnRAR 上游**：解压能力由内置 UnRAR 版本决定，不支持未来新增的压缩/加密算法扩展。
+## Project layout
+
+```text
+Sources/Core/      Extraction engine, process handling, staging, merging, safety
+Sources/App/       Finder events, background queue, prompts, progress UI, settings
+Resources/         Info.plist
+Tests/             Core tests and checked-in RAR fixtures
+scripts/           Build, icon generation, installation, and test scripts
+vendor/unrar/      UnRAR source and license
+```
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the extraction transaction and
+process model.
+
+## Limitations
+
+- RARx extracts RAR archives; it does not create them. The UnRAR license
+  prohibits using its source to build a RAR-compatible archiver.
+- The current conflict policy is always "keep both". There is no option to
+  replace existing files.
+- Archive entries stored as hard links are not preserved. Staged files with
+  multiple hard links are removed by the safety validation.
+- The application is ad-hoc signed and not notarized. The repository does not
+  provide a Gatekeeper-ready binary.
+- The optional password prompt may not receive keyboard focus automatically on
+  macOS 14 and later because background apps cannot force activation. It is
+  brought to the front; click the password field to focus it.
+- macOS may show a folder-access prompt (TCC) the first time RARx extracts into
+  a protected location such as Desktop, Documents, or Downloads.
+- `sandbox-exec` is deprecated by Apple. RARx uses it as an additional
+  mitigation, not as a substitute for App Sandbox or code review.
+- Merging is not a single filesystem transaction. The common failure modes are
+  rolled back, but a failure during rollback can leave a partially merged
+  result and a preserved staging directory.
+- RAR4/RAR5 support and legacy format behavior are inherited from UnRAR 7.13.
+  The test suite focuses on RAR5 and does not exhaustively cover every legacy
+  variant.
+- The `x86_64` slice is built but has not been tested on Intel hardware or under
+  Rosetta.
+
+## Contributing
+
+Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for build,
+test, and review requirements.
+
+Do not report security vulnerabilities in a public issue. Use the private
+reporting process described in [`SECURITY.md`](SECURITY.md).
 
 ## License
 
-RARx 的原创代码以 **MIT License** 发布，详见 [`LICENSE`](LICENSE)。
+The original RARx source code is licensed under the **MIT License**. See
+[`LICENSE`](LICENSE).
 
-UnRAR 是独立的 freeware 组件，**不适用 MIT License**。其完整许可和版权声明见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)，安装后位于 `RARx.app/Contents/Resources/THIRD_PARTY_NOTICES.txt`，也可从设置窗口的“RARx 许可”和“第三方许可”查看。
+UnRAR is a separate component with its own license and is **not** covered by
+the MIT License. Its complete license and attribution notice is in
+[`THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt). The same notice is included
+in the application bundle at
+`RARx.app/Contents/Resources/THIRD_PARTY_NOTICES.txt` and is available from
+Settings.
 
-RAR 是 RARLAB 的商标。RARx 与 RARLAB 无关联。
+RAR is a trademark of RARLAB. RARx is not affiliated with RARLAB.

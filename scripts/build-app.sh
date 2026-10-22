@@ -19,7 +19,7 @@ fi
 
 rm -rf "$BUILD/RARx-arm64" "$BUILD/RARx-x86_64"
 for ARCH in arm64 x86_64; do
-    echo "Compiling RARx for ${ARCH}…"
+    echo "Compiling RARx for ${ARCH}..."
     swiftc -O -whole-module-optimization -swift-version 5 \
         -target "$ARCH-apple-macos$MIN_MACOS" \
         -framework AppKit \
@@ -44,7 +44,7 @@ cp "$ENGINE" "$APP/Contents/Resources/engine/unrar"
 chmod 755 "$APP/Contents/Resources/engine/unrar"
 cp "$ROOT/build/engine/LICENSE.txt" "$APP/Contents/Resources/engine/LICENSE.txt"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE.txt"
-cp "$ROOT/THIRD_PARTY_NOTICES.md" "$APP/Contents/Resources/THIRD_PARTY_NOTICES.txt"
+cp "$ROOT/THIRD_PARTY_NOTICES.txt" "$APP/Contents/Resources/THIRD_PARTY_NOTICES.txt"
 cp "$BUILD/icons/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 cp "$BUILD/icons/RARFile.icns" "$APP/Contents/Resources/RARFile.icns"
 

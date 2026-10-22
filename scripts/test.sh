@@ -37,13 +37,13 @@ sleep 0.3
 run_case() {
     local label="$1"
     shift
-    echo "— $label"
+    echo "- $label"
     if ! "$@"; then
-        echo "  ✗ $label"
+        echo "  FAIL: $label"
         FAIL=$((FAIL + 1))
         return 1
     fi
-    echo "  ✓ $label"
+    echo "  ok: $label"
 }
 
 wait_for_exit() {
@@ -106,19 +106,19 @@ wait_for_exit || { echo "    app did not exit"; FAIL=$((FAIL+1)); }
 
 # Installed default handler.
 if [[ "$APP" == "/Applications/RARx.app" ]]; then
-    echo "— default .rar handler"
+    echo "- default .rar handler"
     if "$APP/Contents/MacOS/RARx" --verify-default; then
         CASE="$TMP/default"
         mkdir -p "$CASE"
         cp "$ROOT/Tests/Fixtures/sample.rar" "$CASE/"
         if open -W "$CASE/sample.rar" && [[ -f "$CASE/readme.txt" ]]; then
-            echo "  ✓ Finder default handler opens and extracts"
+            echo "  ok: Finder default handler opens and extracts"
         else
-            echo "  ✗ Finder default handler"
+            echo "  FAIL: Finder default handler"
             FAIL=$((FAIL + 1))
         fi
     else
-        echo "  ✗ RARx is not the default .rar handler"
+        echo "  FAIL: RARx is not the default .rar handler"
         FAIL=$((FAIL + 1))
     fi
 fi

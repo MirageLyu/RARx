@@ -1,16 +1,17 @@
-RARx — Third-Party Notices
+RARx - Third-Party Notices
 ================================================================================
 
-RARx bundles an unmodified binary build of the UnRAR utility.
-UnRAR is Copyright (c) Alexander Roshal. The full license follows.
+RARx includes UnRAR, compiled from the official RARLAB source distribution
+without modification.
 
-The MIT license in the root LICENSE file applies only to the original RARx
-source code. It does not apply to UnRAR or to the vendor/unrar directory.
+UnRAR is Copyright (c) Alexander Roshal and is distributed under the UnRAR
+freeware license below. UnRAR is not covered by the MIT license that applies
+to the original RARx source code.
 
 RAR is a trademark of RARLAB. RARx is not affiliated with RARLAB.
 
 ================================================================================
-UnRAR — License for use and distribution
+UnRAR - License for use and distribution
 ================================================================================
 
  ******    *****   ******   UnRAR - free utility for RAR archives

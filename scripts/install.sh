@@ -12,7 +12,7 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
 fi
 
 if [[ ! -d "$SOURCE" ]]; then
-    echo "App not built yet; building…"
+    echo "App not built yet; building..."
     "$ROOT/scripts/build-app.sh"
 fi
 
@@ -61,11 +61,11 @@ trap - EXIT
 "$LSREGISTER" -f "$DEST"
 "$LSREGISTER" -u "$ROOT/build/RARx.app" >/dev/null 2>&1 || true
 
-echo "Registering RARx as the default .rar handler…"
+echo "Registering RARx as the default .rar handler..."
 "$DEST/Contents/MacOS/RARx" --set-default
 "$DEST/Contents/MacOS/RARx" --handler-status
 "$DEST/Contents/MacOS/RARx" --verify-default
 
 echo
 echo "Installed: $DEST"
-echo "Finder 中双击 .rar 会直接解压到压缩包所在目录，不再打开主窗口。"
+echo "RARx is installed. Double-click a .rar in Finder to extract it alongside the archive."

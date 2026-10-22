@@ -26,7 +26,7 @@ for ARCH in arm64 x86_64; do
     WORK="$ROOT/build/engine-$ARCH"
     mkdir -p "$WORK"
     ditto "$SOURCE/" "$WORK/"
-    echo "Building UnRAR for ${ARCH}…"
+    echo "Building UnRAR for ${ARCH}..."
     make -C "$WORK" -j"$(sysctl -n hw.ncpu)" \
         CXX="clang++ -arch $ARCH -mmacosx-version-min=$MIN_MACOS" \
         unrar >"$ROOT/build/unrar-$ARCH.log" 2>&1
