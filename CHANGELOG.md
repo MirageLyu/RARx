@@ -15,6 +15,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
   preferred language.
 - Automatic fallback to English for unsupported system languages.
 - Localization key and format-specifier validation in the test suite.
+- A universal ad-hoc build for `arm64` and `x86_64`, distributed through GitHub
+  Releases as a free community download. It is not notarized.
 - Architecture, security, contribution, and changelog documentation.
 - GitHub issue templates and a pull request template.
 

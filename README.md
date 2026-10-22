@@ -89,6 +89,20 @@ Installing changes the current user's default `.rar` handler. Review
 [`scripts/install.sh`](scripts/install.sh) before running it if you prefer to
 perform these steps manually.
 
+### Prebuilt ad-hoc build
+
+The [Releases](https://github.com/MirageLyu/RARx/releases) page includes a
+universal ad-hoc build named `RARx-<version>-universal-adhoc.zip`. It supports
+both `arm64` and `x86_64`.
+
+This build is ad-hoc signed and is **not notarized by Apple**. On a Mac with
+default Gatekeeper settings, macOS will normally require per-app approval on
+first launch. The archive includes `INSTALL.txt` with the installation and
+approval steps. Verify the download against `SHA256SUMS` before opening it.
+
+The ad-hoc build is provided for convenience. Build from source if you need a
+locally trusted application.
+
 ## Build
 
 ```bash
